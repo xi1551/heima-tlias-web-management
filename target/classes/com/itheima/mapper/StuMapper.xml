@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.StuMapper">
+
+    <update id="update">
+        update student
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="no != null">
+                no = #{no},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="degree != null">
+                degree = #{degree},
+            </if>
+            <if test="idCard != null">
+                id_card = #{idCard},
+            </if>
+            <if test="isCollege != null">
+                is_college = #{isCollege},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="graduationDate != null">
+                graduation_date = #{graduationDate},
+            </if>
+            <if test="violationCount != null">
+                violation_count = #{violationCount},
+            </if>
+            <if test="violationScore != null">
+                violation_score = #{violationScore},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="vioupdate">
+        update student
+        set violation_count = violation_count + 1,
+        violation_score = violation_score + #{score},
+        update_time = #{now}
+        where id = #{id}
+    </update>
+
+
+    <delete id="deleteById">
+        delete from student where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="List" resultType="com.itheima.pojo.Student">
+        select s.*,c.name as clazzName from student s left join clazz c on s.clazz_id = c.id
+        <where>
+            <if test="name != null and name != ''">
+                s.name like concat('%',#{name},'%')
+            </if>
+            <if test="degree != null and degree !=''">
+                and (s.degree = #{degree})
+            </if>
+            <if test="clazzId != null and clazzId !=''">
+                and (s.clazz_id = #{clazzId})
+            </if>
+        </where>
+        order by graduation_date desc
+    </select>
+
+    <select id="GetStudentDegreeData" resultType="java.util.Map">
+        select
+            (case degree
+                when 1 then '初中'
+                when 2 then '高中'
+                when 3 then '大专'
+                when 4 then '本科'
+                when 5 then '硕士'
+                when 6 then '博士'
+                else '其他' end)  name,
+            count(*) value
+        from student group by degree order by value
+    </select>
+
+    <select id="GetStudentCountData" resultType="java.util.Map">
+        select
+            c.name as clazzname,
+            count(*) value
+        from student s left join clazz c on s.clazz_id = c.id
+        group by c.name order by value desc
+    </select>
+</mapper>
